@@ -4944,9 +4944,15 @@ describe('ParseGraphQLServer', () => {
             await parseGraphQLServer.parseGraphQLSchema.databaseController.schemaCache.clear();
 
             async function findObjects(className, headers) {
-              const graphqlClassName = pluralize(
-                className.charAt(0).toLowerCase() + className.slice(1)
-              );
+              const graphqlSingularClassName = className.charAt(0).toLowerCase() + className.slice(1);
+              let graphqlClassName = pluralize(graphqlSingularClassName);
+
+              // If no plural can be created (for words like "Data", "Media", "Content"), 
+              // suffix "Objects" to make schema generation succeed
+              if (graphqlSingularClassName == graphqlClassName) {
+                graphqlClassName += "Objects";
+              }
+
               const result = await apolloClient.query({
                 query: gql`
                   query FindSomeObjects {
